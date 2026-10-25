@@ -1,0 +1,15 @@
+<resources>
+    <color name="parcel_teal">#0B5351</color>
+    <style name="Theme.Parcel.Base" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">#0A0F1C</item>
+    </style>
+    <style name="Theme.Parcel" parent="Theme.Parcel.Base" />
+    <style name="Theme.Parcel.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0A0F1C</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_parcel</item>
+        <item name="postSplashScreenTheme">@style/Theme.Parcel</item>
+    </style>
+</resources>

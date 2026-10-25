@@ -1,0 +1,15 @@
+.gradle/
+.gradle-home/
+.kotlin/
+**/build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+captures/
+.env
+.env.*
+*.db
+*.db-shm
+*.db-wal
+__pycache__/
