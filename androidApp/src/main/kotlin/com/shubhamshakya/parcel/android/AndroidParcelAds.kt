@@ -23,7 +23,7 @@ import com.shubhamshakya.parcel.domain.ParcelFeatures
 import com.shubhamshakya.parcel.presentation.*
 
 /** Activity-scoped consent UI; ad views and SDK objects never enter shared state. */
-class AndroidParcelAds(private val activity: Activity, delivery: com.parcel.domain.DeliveryRepository) : ParcelAds {
+class AndroidParcelAds(private val activity: Activity, delivery: com.shubhamshakya.parcel.domain.DeliveryRepository) : ParcelAds {
     private companion object {
         var initializationStarted = false
         var sdkReady by mutableStateOf(false)

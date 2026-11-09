@@ -11,6 +11,7 @@
 ## Shelf rewards
 
 - Six free spaces (1–6), twelve total. Spaces 7–12 can each be unlocked permanently on this device by earning one optional rewarded ad.
+- While `ParcelFeatures.GOOGLE_ADS_ENABLED` is `false` the locked spaces are hidden rather than shown as a dead end, since no rewarded ad can play. A space unlocked earlier still appears.
 - Tapping a locked space shows a custom disclosure with the exact reward and “Not now”. Only “Watch ad · unlock 1 space” requests an ad. Cancelling a pending load prevents it from appearing later.
 - A space unlocks only from Google's earned-reward callback, never from loading, showing or dismissal. Skipping/closing without earning or an ad failure leaves it locked. Duplicate callbacks for the same space do not grant another space.
 - Unlocks use existing Room preference rows, persist across restarts and remain device-wide like the shelf. Existing occupied slots beyond six are retained on upgrade. No database schema change is required.

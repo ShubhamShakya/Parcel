@@ -50,24 +50,36 @@ class ShelfRewardFlowTest {
                     PurchasedScreen(emptyList(), emptyList(), state, vm, {})
                 } }
             } }
-            waitFor("shelf_slot_6")
-            compose.onNodeWithTag("purchased_list").performScrollToNode(hasTestTag("shelf_slot_6"))
-            compose.onNodeWithTag("shelf_slot_6").performClick()
-            compose.onNodeWithTag("cancel_shelf_ad").performClick()
-            assertEquals(0, requests)
-            compose.onNodeWithTag("shelf_slot_6").performClick()
-            compose.onNodeWithTag("watch_shelf_ad").performClick()
-            assertEquals(1, requests)
-            assertEquals(6, rewardSlot)
-            assertEquals(6, runBlocking { repo.observe().first().unlockedSlots.size })
-            scenario.onActivity { completion?.invoke("Ad closed before earning the reward.") }
-            compose.onNodeWithText("OK").performClick()
-            assertEquals(6, runBlocking { repo.observe().first().unlockedSlots.size })
-            compose.onNodeWithTag("shelf_slot_6").performClick()
-            compose.onNodeWithTag("watch_shelf_ad").performClick()
-            runBlocking { repo.unlockSlot(rewardSlot); repo.unlockSlot(rewardSlot) }
-            scenario.onActivity { completion?.invoke(null) }
-            compose.onNodeWithText("OK").performClick()
+            if (ParcelFeatures.GOOGLE_ADS_ENABLED) {
+                waitFor("shelf_slot_6")
+                compose.onNodeWithTag("purchased_list").performScrollToNode(hasTestTag("shelf_slot_6"))
+                compose.onNodeWithTag("shelf_slot_6").performClick()
+                compose.onNodeWithTag("cancel_shelf_ad").performClick()
+                assertEquals(0, requests)
+                compose.onNodeWithTag("shelf_slot_6").performClick()
+                compose.onNodeWithTag("watch_shelf_ad").performClick()
+                assertEquals(1, requests)
+                assertEquals(6, rewardSlot)
+                assertEquals(6, runBlocking { repo.observe().first().unlockedSlots.size })
+                scenario.onActivity { completion?.invoke("Ad closed before earning the reward.") }
+                compose.onNodeWithText("OK").performClick()
+                assertEquals(6, runBlocking { repo.observe().first().unlockedSlots.size })
+                compose.onNodeWithTag("shelf_slot_6").performClick()
+                compose.onNodeWithTag("watch_shelf_ad").performClick()
+                runBlocking { repo.unlockSlot(rewardSlot); repo.unlockSlot(rewardSlot) }
+                scenario.onActivity { completion?.invoke(null) }
+                compose.onNodeWithText("OK").performClick()
+            } else {
+                // With rewarded ads switched off a locked space can never be unlocked, so the
+                // shelf shows the six free spaces only and asks for no ad.
+                waitFor("shelf_slot_0")
+                compose.onNodeWithTag("shelf_slot_5").assertExists()
+                compose.onNodeWithTag("shelf_slot_6").assertDoesNotExist()
+                compose.onNodeWithTag("shelf_slot_11").assertDoesNotExist()
+                assertEquals(0, requests)
+                // An entitlement earned before ads were switched off still shows.
+                runBlocking { repo.unlockSlot(6) }
+            }
             compose.waitUntil(10_000) { runBlocking { repo.observe().first().unlockedSlots.size == 7 } }
             scenario.recreate()
             waitFor("tab_purchased")

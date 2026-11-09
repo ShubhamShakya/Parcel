@@ -39,7 +39,9 @@ companion state. See [screen coverage and integration limits](docs/HAAT_COMPANIO
   delivery (3h) → delivered (4h). Reopening catches up; saved progress cannot regress.
 - Animated parcel opening with a lifting lid, smiling face and confetti. Only delivered
   orders can be unboxed; repeat taps never duplicate the purchased items.
-- Purchased tab with a 12-space shelf and an unboxed collection. Tap a space to choose
+- Purchased tab with a collector's shelf and an unboxed collection. Six spaces are free;
+  the remaining six are hidden while advertising is off, because they unlock only by
+  earning a rewarded ad. Tap a space to choose
   from a bottom-sheet grid showing individual purchases and paid amounts; move, replace
   or put away items. Quantities produce separate collectible units.
 - Pastel surfaces, rounded cards, a bouncing parcel friend and matching smiling

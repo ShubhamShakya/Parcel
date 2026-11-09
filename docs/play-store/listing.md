@@ -4,7 +4,7 @@ Paste these into Play Console → Main store listing. Character counts are given
 Console rejects anything over the limit; counts below are for the text as written here.
 
 Every factual claim is checked against the code: 110 products (104 clothing + 6 others)
-across five categories, five delivery stages, a twelve-space shelf, and
+across five categories, five delivery stages, a collector's shelf, and
 `ParcelFeatures.GOOGLE_ADS_ENABLED = false`. **If you enable advertising, change the
 "no advertising and no analytics" line in the full description** — it is scoped to "this
 release" so it is true today, but it would become false.
@@ -64,7 +64,7 @@ WHAT YOU CAN DO
 • See the full price breakdown at checkout: subtotal, discount, tax and fees
 • Follow an order through five delivery stages, or deliver it instantly with one tap
 • Open your parcel — the lid lifts, the confetti flies
-• Give every unboxed find a place on your twelve-space shelf
+• Give every unboxed find a place on your collector's shelf
 
 EVERYTHING HERE IS SIMULATED
 
@@ -85,7 +85,7 @@ Every product illustration was drawn for this app. A smiling parcel keeps you co
 Parcel is for anyone who enjoys window shopping, who wants to try the shape of an online order without the cost, or who simply likes opening parcels.
 ```
 
-1,732 characters.
+1,731 characters.
 
 ### Why it is written this way
 
@@ -97,5 +97,5 @@ Parcel is for anyone who enjoys window shopping, who wants to try the shape of a
   that this is a storefront for someone else's catalogue.
 - **No superlatives, no keyword stuffing, no fake testimonials, no emoji.** All of these
   draw metadata rejections.
-- **Claims stay checkable.** "More than 100 items" against 110; "five delivery stages" and
-  "twelve-space shelf" against the code.
+- **Claims stay checkable.** "More than 100 items" against 110; "five delivery stages" against the code. The shelf is described without a
+  number because how many spaces are visible depends on whether ads are enabled.

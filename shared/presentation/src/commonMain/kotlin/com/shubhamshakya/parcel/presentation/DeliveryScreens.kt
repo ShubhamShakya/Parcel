@@ -146,6 +146,9 @@ fun PurchasedScreen(receipts: List<Receipt>, products: List<Product>, state: Del
     var selectedSlot by rememberSaveable { mutableStateOf<Int?>(null) }
     var unlockSlot by remember { mutableStateOf<Int?>(null) }
     var rewardLoading by remember { mutableStateOf(false) }
+    // Locked spaces are only worth showing while a rewarded ad can actually unlock them.
+    val visibleSlots = if (ParcelFeatures.GOOGLE_ADS_ENABLED) (0 until SHELF_SIZE).toList()
+        else (0 until SHELF_SIZE).filter { it in state.snapshot.unlockedSlots }
     var rewardMessage by remember { mutableStateOf<String?>(null) }
     var cancelReward by remember { mutableStateOf<(() -> Unit)?>(null) }
     DisposableEffect(ads) { onDispose { cancelReward?.invoke() } }
@@ -172,17 +175,18 @@ fun PurchasedScreen(receipts: List<Receipt>, products: List<Product>, state: Del
                 Column(Modifier.weight(1f)) { Text("My little shelf", style = MaterialTheme.typography.headlineMedium, color = Teal); Text("A home for every happy find.", color = Muted) }
                 ParcelFriend(Modifier.size(76.dp), greeting = true)
             }
-            Text("${items.size} unboxed · ${state.snapshot.shelf.size}/${state.snapshot.unlockedSlots.size} unlocked spaces filled", style = MaterialTheme.typography.bodySmall)
+            Text("${items.size} unboxed · ${state.snapshot.shelf.size}/${visibleSlots.size}" +
+                (if (ParcelFeatures.GOOGLE_ADS_ENABLED) " unlocked spaces filled" else " spaces filled"),
+                style = MaterialTheme.typography.bodySmall)
             TextButton(onClick = orders, modifier = Modifier.testTag("purchased_orders")) { Text("My orders & deliveries") }
         }
         item(key = "purchased_native") { ads.NativeCard(AdPlacement.Purchased) }
         item {
             Surface(color = Peach, shape = RoundedCornerShape(26.dp), shadowElevation = 2.dp) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    repeat(4) { row ->
+                    visibleSlots.chunked(3).forEach { rowSlots ->
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            repeat(3) { column ->
-                                val slot = row*3+column
+                            rowSlots.forEach { slot ->
                                 val item = items.find { it.id == state.snapshot.shelf.find { p -> p.slot == slot }?.itemId }
                                 val product = products.find { it.id == item?.productId }
                                 Surface(onClick = { if (slot in state.snapshot.unlockedSlots) selectedSlot = slot else unlockSlot = slot }, enabled = !state.loading && !state.busy && !rewardLoading, color = ParcelSurface, shape = RoundedCornerShape(16.dp), modifier = Modifier.weight(1f).height(126.dp).testTag("shelf_slot_$slot")) {
@@ -196,6 +200,7 @@ fun PurchasedScreen(receipts: List<Receipt>, products: List<Product>, state: Del
                                     }
                                 }
                             }
+                            repeat(3 - rowSlots.size) { Spacer(Modifier.weight(1f)) }
                         }
                     }
                 }
