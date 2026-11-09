@@ -267,3 +267,11 @@ publicly hardened, authenticated multi-user payment backend.
 - Preserved native ads on Home/category lists. Added inline adaptive Google test banners under the headings of Wishlist, Cart and Purchased. Cart banner is in the scroll content, separate from its pinned checkout action. Checkout/payment/tracking/unboxing remain ad-free.
 - Banner width follows available content width (requested maximum height 100dp). SDK objects pause/resume with lifecycle, clean up on navigation, and hide on load failure. Each production placement has its own banner unit configuration.
 - Presentation JVM tests and Android build passed. `SectionBannerAdsTest` passed on emulator-5554: Google test banners loaded/displayed in all three tabs, Purchased survived activity recreation, and Cart banner disappeared on proceeding to checkout. No ad was clicked.
+
+
+## Native/interstitial layout and shelf rewards · 27 October 2026
+
+- Latest requested layout supersedes banners: native cards in Wishlist/Purchased plus existing Home/category placements; preloaded interstitials at Cart/Profile tab entry. Initial grace 60s, minimum two tab transitions, shared cooldown 120s, no surprise display after a delayed load. Navigation destination is committed with the initiating tap to survive Activity recreation.
+- Six shelf spaces are free. Each of the remaining six requires an optional rewarded ad, requested only after confirming the disclosed one-space reward. Cancellation, missing ads and dismissal without earning do not unlock. Earned callbacks save idempotently in an application-lifetime coroutine; existing occupied spaces remain available after upgrade.
+- Shared tests passed: **55 total** (26 domain, 18 data, 11 presentation), including persistence/reopening, duplicate unlocks, legacy occupied spaces, invalid slots and interstitial timing/clock rollback.
+- Android app and UI-test APK compilation passed. Added controlled-callback ShelfRewardFlowTest and online SectionNativeAdsTest. Initial installation attempts blocked by emulator package/storage-service failures (missing package service, then PackageManagerInternal.freeStorage null). A non-destructive reboot is being checked; no app data was wiped.

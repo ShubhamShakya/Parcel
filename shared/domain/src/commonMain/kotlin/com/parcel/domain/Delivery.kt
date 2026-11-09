@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 const val DELIVERY_DAY_MS = 24 * 60 * 60 * 1000L
 const val DELIVERY_DURATION_MS = 4 * 60 * 60 * 1000L
 const val SHELF_SIZE = 12
+const val FREE_SHELF_SIZE = 6
 
 enum class DeliveryStage(val label: String, val afterHours: Int) {
     Confirmed("Order confirmed", 0), Shipped("Shipped", 1), NearbyHub("Reached your nearby hub", 2),
@@ -51,13 +52,15 @@ fun purchasedItems(receipt: Receipt): List<PurchasedItem> {
 }
 
 data class ShelfPlacement(val slot: Int, val itemId: String)
-data class DeliverySnapshot(val orders: List<DeliveryProgress> = emptyList(), val shelf: List<ShelfPlacement> = emptyList())
+data class DeliverySnapshot(val orders: List<DeliveryProgress> = emptyList(), val shelf: List<ShelfPlacement> = emptyList(),
+    val unlockedSlots: Set<Int> = (0 until FREE_SHELF_SIZE).toSet())
 interface DeliveryRepository {
     fun observe(): Flow<DeliverySnapshot>
     suspend fun refresh()
     suspend fun deliverNow(orderId: String)
     suspend fun unbox(orderId: String)
     suspend fun place(slot: Int, itemId: String)
+    suspend fun unlockSlot(slot: Int)
     suspend fun clearSlot(slot: Int)
 }
 

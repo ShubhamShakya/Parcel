@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(10, 15, 28)),
         )
-        ads = AndroidParcelAds(this)
+        ads = AndroidParcelAds(this, get())
         ads.start()
         setContent { CompositionLocalProvider(LocalParcelAds provides ads) { ParcelApp() } }
     }

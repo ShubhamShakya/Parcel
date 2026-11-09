@@ -124,4 +124,4 @@ beside the local font files.
 
 ## Advertising
 
-Android debug builds include Google native test ads on Home and category lists, plus inline adaptive banner test ads in Wishlist, Cart and Purchased. Release ads are disabled by default. See [AdMob setup](docs/ADMOB.md) for IDs, consent, audience configuration and release requirements.
+Android debug builds include Google native test ads on Home, category lists, Wishlist and Purchased; frequency-capped interstitials on Cart/Profile entry; and optional rewarded ads to unlock shelf spaces beyond the six free spaces. Release ads are disabled by default. See [AdMob setup](docs/ADMOB.md) for IDs, consent, audience configuration and release requirements.

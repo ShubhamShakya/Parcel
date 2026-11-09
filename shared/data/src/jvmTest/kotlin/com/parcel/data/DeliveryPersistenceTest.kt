@@ -10,6 +10,23 @@ import kotlin.io.path.createTempDirectory
 import kotlin.test.*
 
 class DeliveryPersistenceTest {
+    @Test fun defaultSixSlotsAndLegacyOccupiedSpacesArePreserved(): Unit = runBlocking {
+        val db = buildDatabase(Room.inMemoryDatabaseBuilder<ParcelDatabase>())
+        try {
+            val repo = RoomDeliveryRepository(db)
+            assertEquals((0 until 6).toSet(), repo.observe().first().unlockedSlots)
+            db.deliveryDao().putSlot(ShelfEntity(9, "legacy-item"))
+            repo.refresh()
+            assertEquals((0 until 6).toSet() + 9, repo.observe().first().unlockedSlots)
+            repo.clearSlot(9)
+            repo.refresh()
+            assertTrue(9 in repo.observe().first().unlockedSlots)
+            assertFailsWith<IllegalArgumentException> { repo.unlockSlot(12) }
+            repo.unlockSlot(8); repo.unlockSlot(8)
+            assertEquals((0 until 6).toSet() + setOf(8, 9), repo.observe().first().unlockedSlots)
+        } finally { db.close() }
+    }
+
     @Test fun offlineProgressOtpUnboxingAndShelfSurviveReopening(): Unit = runBlocking {
         val folder = createTempDirectory("parcel-delivery").toFile()
         val path = folder.resolve("shop.db").absolutePath
@@ -38,12 +55,15 @@ class DeliveryPersistenceTest {
             repo.place(0, items[0].id); repo.place(1, items[1].id)
             repo.place(1, items[0].id) // Move one unit, replacing another without losing ownership.
             assertEquals(listOf(ShelfPlacement(1, items[0].id)), repo.observe().first().shelf)
+            assertFailsWith<IllegalStateException> { repo.place(11, items[1].id) }
+            repo.unlockSlot(11); repo.unlockSlot(11)
             repo.place(11, items[1].id)
             assertFailsWith<IllegalArgumentException> { repo.place(12, items[0].id) }
             assertFailsWith<IllegalStateException> { repo.place(3, "not-owned") }
             db.close(); db = open(); repo = RoomDeliveryRepository(db) { 0 }
             repo.refresh()
             val restored = repo.observe().first()
+            assertEquals((0 until 6).toSet() + 11, restored.unlockedSlots)
             assertEquals(2, restored.shelf.size)
             assertNotNull(restored.orders.single().unboxedAt)
             assertEquals(DeliveryStage.Delivered, restored.orders.single().stage)

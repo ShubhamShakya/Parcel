@@ -10,12 +10,12 @@ import org.junit.Test
 import org.koin.core.context.GlobalContext
 
 /** Online test using Google demo units; never clicks advertisements. */
-class SectionBannerAdsTest {
+class SectionNativeAdsTest {
     @get:Rule val compose = createEmptyComposeRule()
     private fun waitFor(tag: String, timeout: Long = 20_000) = compose.waitUntil(timeout) {
         compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
     }
-    @Test fun bannersLoadInRequestedTabsAndStayOutOfCheckout() {
+    @Test fun nativeAdsLoadInWishlistAndPurchased() {
         runBlocking {
             signInTestShopper()
             val db = GlobalContext.get().get<ParcelDatabase>()
@@ -28,17 +28,14 @@ class SectionBannerAdsTest {
         }
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             waitFor("tab_wishlist")
-            listOf("wishlist" to "Wishlist", "cart" to "Cart", "purchased" to "Purchased").forEach { (tab, placement) ->
+            listOf("wishlist" to "Wishlist", "purchased" to "Purchased").forEach { (tab, placement) ->
                 compose.onNodeWithTag("tab_$tab").performClick()
-                waitFor("banner_ad_$placement", 90_000)
-                compose.onNodeWithTag("banner_ad_$placement").assertIsDisplayed()
+                waitFor("native_ad_$placement", 90_000)
+                compose.onNodeWithTag("native_ad_$placement").assertIsDisplayed()
             }
             scenario.recreate()
-            waitFor("banner_ad_Purchased", 90_000)
-            compose.onNodeWithTag("tab_cart").performClick()
-            waitFor("cart_checkout")
-            compose.onNodeWithTag("cart_checkout").performClick()
-            compose.onNodeWithTag("banner_ad_Cart").assertDoesNotExist()
+            waitFor("native_ad_Purchased", 90_000)
+
         }
     }
 }

@@ -27,7 +27,6 @@ fun ScreenHeading(title: String, back: (() -> Unit)? = null) {
 
 @Composable
 fun CartScreen(products: List<Product>, state: CommerceState, vm: CommerceViewModel, checkout: () -> Unit, orders: () -> Unit) {
-    val ads = LocalParcelAds.current
     val snapshot = state.snapshot
     Scaffold(containerColor = Ivory, contentWindowInsets = WindowInsets(0), bottomBar = {
         if (snapshot.cart.isNotEmpty() && products.isNotEmpty()) Surface(color = ParcelSurface) {
@@ -42,7 +41,6 @@ fun CartScreen(products: List<Product>, state: CommerceState, vm: CommerceViewMo
     }) { insets ->
     LazyColumn(Modifier.fillMaxSize().padding(insets).testTag("cart_list"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { ScreenHeading("Your cart") }
-        item(key = "cart_banner") { ads.Banner(BannerPlacement.Cart) }
         if (state.loadError) item { Button(onClick = vm::reload) { Text("Retry loading cart") } }
         else if (state.loading) item { CircularProgressIndicator() }
         else if (snapshot.cart.isEmpty()) item { Text("Your cart is waiting for a good find.", style = MaterialTheme.typography.titleMedium) }
