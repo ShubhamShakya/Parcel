@@ -10,7 +10,7 @@ Parcel starts in dark mode by default. Profile → Appearance switches between l
 and dark, with the choice saved on this device. Shared popups and system bars follow
 the selected appearance.
 
-## Haat-inspired UI refresh
+## Parcel-inspired UI refresh
 
 Sage/navy/amber styling with bundled Albert Sans, illustrated home shortcuts, clothing
 entry tiles, sorting, product discount cards, fixed purchase/checkout bars, an illustrative
