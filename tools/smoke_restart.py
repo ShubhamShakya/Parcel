@@ -14,7 +14,7 @@ parser.add_argument('--serial', default='emulator-5554')
 args = parser.parse_args()
 sdk = os.environ.get('ANDROID_HOME', str(Path.home() / 'Library/Android/sdk'))
 adb = [str(Path(sdk) / 'platform-tools/adb'), '-s', args.serial]
-component = 'com.parcel.simulator/com.parcel.android.MainActivity'
+component = 'com.shubhamshakya.parcel/com.shubhamshakya.parcel.android.MainActivity'
 
 def call(*command):
     return subprocess.check_output(adb + list(command), text=True)
@@ -66,7 +66,7 @@ else:
     assert find('Remove Everyday headphones from wishlist') is not None, 'Expected sample headphones on home'
 time.sleep(0.5)
 # The process is killed, not just the Activity recreated.
-call('shell', 'am', 'force-stop', 'com.parcel.simulator')
+call('shell', 'am', 'force-stop', 'com.shubhamshakya.parcel')
 call('shell', 'am', 'start', '-W', '-n', component)
 assert find('I understand · Explore Parcel') is None, 'Onboarding acceptance did not persist'
 wishlist = find('Wishlist')

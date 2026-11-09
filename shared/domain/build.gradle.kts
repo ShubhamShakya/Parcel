@@ -6,4 +6,4 @@ kotlin {
         commonTest.dependencies { implementation(kotlin("test")); implementation(libs.coroutines.test) }
     }
 }
-android { namespace = "com.parcel.domain"; compileSdk = 36; defaultConfig { minSdk = 23 } }
+android { namespace = "com.shubhamshakya.parcel.domain"; compileSdk = 36; defaultConfig { minSdk = 23 } }

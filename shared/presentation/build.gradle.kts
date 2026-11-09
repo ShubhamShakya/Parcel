@@ -16,5 +16,5 @@ kotlin {
         commonTest.dependencies { implementation(kotlin("test")); implementation(libs.coroutines.test) }
     }
 }
-android { namespace = "com.parcel.presentation"; compileSdk = 36; defaultConfig { minSdk = 23 } }
-compose.resources { packageOfResClass = "com.parcel.resources" }
+android { namespace = "com.shubhamshakya.parcel.presentation"; compileSdk = 36; defaultConfig { minSdk = 23 } }
+compose.resources { packageOfResClass = "com.shubhamshakya.parcel.resources" }

@@ -16,7 +16,7 @@ kotlin {
         commonTest.dependencies { implementation(kotlin("test")); implementation(libs.coroutines.test) }
     }
 }
-android { namespace = "com.parcel.data"; compileSdk = 36; defaultConfig { minSdk = 23 } }
+android { namespace = "com.shubhamshakya.parcel.data"; compileSdk = 36; defaultConfig { minSdk = 23 } }
 dependencies {
     add("kspAndroid", libs.room.compiler)
     add("kspJvm", libs.room.compiler)

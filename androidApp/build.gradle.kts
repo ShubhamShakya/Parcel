@@ -19,9 +19,9 @@ if (liveAds) {
     (listOf(homeAdId, categoryAdId) + bannerIds.values).forEach { require(Regex("ca-app-pub-[0-9]{16}/[0-9]{10}").matches(it) && !it.contains("3940256099942544")) }
 }
 android {
-    namespace = "com.parcel.android"; compileSdk = 36
+    namespace = "com.shubhamshakya.parcel.android"; compileSdk = 36
     defaultConfig {
-        applicationId = "com.parcel.simulator"; minSdk = 23; targetSdk = 36
+        applicationId = "com.shubhamshakya.parcel"; minSdk = 23; targetSdk = 36
         versionCode = 7; versionName = "0.6.0"
         buildConfigField("String", "PAYU_SANDBOX_BASE_URL", "\"${payUSandboxUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         manifestPlaceholders["admobAppId"] = if (liveAds) adsAppId else "ca-app-pub-3940256099942544~3347511713"

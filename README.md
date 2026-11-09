@@ -6,9 +6,9 @@ are purchased or shipped.** Use only fictional address data and test payment inp
 
 ## Appearance
 
-Parcel starts in dark mode by default. Profile → Appearance switches between light
-and dark, with the choice saved on this device. Shared popups and system bars follow
-the selected appearance.
+Parcel follows your device's light/dark setting by default. Profile → Appearance
+switches between System, Light and Dark, with the choice saved on this device.
+Shared popups and system bars follow the resolved appearance.
 
 ## Parcel-inspired UI refresh
 
@@ -28,7 +28,8 @@ companion state. See [screen coverage and integration limits](docs/HAAT_COMPANIO
 ## Existing shopping features
 
 - Phone login/sign-up with a searchable country-code selector and 9–16 local digits.
-  Any four non-space OTP characters verify in this offline simulator; no SMS is sent.
+  Any four digits verify in this offline simulator; no SMS is sent. The OTP field
+  opens a numeric keypad.
 - First/last names for new numbers, direct login for existing numbers, saved sessions,
   logout and an animated 30-second resend countdown that survives app restarts.
   Profiles are local; shopping data remains shared on this installation.
@@ -59,9 +60,10 @@ companion state. See [screen coverage and integration limits](docs/HAAT_COMPANIO
   discounted merchandise), ₹29 convenience fee, simulated delivery and total.
 - Explicit local demo payment, immutable saved receipts and simulated order history.
 - PayU CheckoutPro Android sandbox adapter supporting account-enabled UPI/card flows,
-  Ktor backend calls, pending-payment recovery and independent verification. **PayU
-  is unavailable in the default build until configured; no live credentials or
-  gateway transaction tests have been supplied.** See the setup guide below.
+  Ktor backend calls, pending-payment recovery and independent verification. **PayU is
+  switched off at `ParcelFeatures.PAYU_ENABLED` and the checkout option is hidden; no
+  live credentials or gateway transaction tests have been supplied.** Turning the flag
+  on still requires a configured backend URL. See the setup guide below.
 - Room v1→v2→v3→v4 automatic migrations preserve wishlist, onboarding, cart and receipts.
 
 Browsing, saved items, cart, demo addresses and local checkout work offline. The
@@ -120,8 +122,10 @@ is needed only to regenerate them). Manrope's SIL Open Font License is bundled
 beside the local font files.
 
 [Phone login](docs/PHONE_LOGIN.md) · [PayU sandbox setup](docs/PAYU_SANDBOX.md) · [Architecture](docs/ARCHITECTURE.md) ·
-[Verification](docs/VERIFICATION.md)
+[Verification](docs/VERIFICATION.md) ·
+[Play Store artwork](docs/play-store/README.md) ·
+[Privacy policy](docs/privacy-policy/index.html)
 
 ## Advertising
 
-Android debug builds include Google native test ads on Home and category lists, plus inline adaptive banner test ads in Wishlist, Cart and Purchased. Release ads are disabled by default. See [AdMob setup](docs/ADMOB.md) for IDs, consent, audience configuration and release requirements.
+Advertising is switched off at `ParcelFeatures.GOOGLE_ADS_ENABLED`, so no ad SDK work runs and no slots render. With the flag on, Android debug builds show Google native test ads on Home and category lists, plus inline adaptive banner test ads in Wishlist, Cart and Purchased; release ads additionally need `liveAds`. See [AdMob setup](docs/ADMOB.md) for IDs, consent, audience configuration and release requirements.

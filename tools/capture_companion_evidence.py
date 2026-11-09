@@ -3,8 +3,8 @@ from pathlib import Path
 # Reuse the existing read/click helpers without its shopping workflow.
 source = (Path(__file__).parent / 'capture_haat_evidence.py').read_text()
 exec(source.split("run('shell','am','start'")[0])
-run('shell','am','force-stop','com.parcel.simulator')
-run('shell','am','start','-W','-n','com.parcel.simulator/com.parcel.android.MainActivity')
+run('shell','am','force-stop','com.shubhamshakya.parcel')
+run('shell','am','start','-W','-n','com.shubhamshakya.parcel/com.shubhamshakya.parcel.android.MainActivity')
 accept=find('I understand · Explore Parcel')
 if accept is not None: tap(accept)
 from simulator_login import login_if_needed

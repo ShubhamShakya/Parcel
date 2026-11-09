@@ -6,7 +6,7 @@ def login_if_needed(run, find, click):
     run('shell', 'input', 'text', '9000000000')
     run('shell', 'input', 'keyevent', '4')
     click('Continue with phone', scroll=True)
-    click('4-character verification code')
+    click('4-digit verification code')
     run('shell', 'input', 'text', '1234')
     run('shell', 'input', 'keyevent', '4')
     click('Verify & continue', scroll=True)

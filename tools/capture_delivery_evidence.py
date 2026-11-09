@@ -35,8 +35,8 @@ def shot(name):
     nodes() # Wait for the UI hierarchy to settle before capturing.
     (OUT/name).write_bytes(subprocess.check_output(ADB+['exec-out','screencap','-p']))
 run('shell','settings','put','global','animator_duration_scale','1')
-run('shell','am','force-stop','com.parcel.simulator')
-run('shell','am','start','-W','-n','com.parcel.simulator/com.parcel.android.MainActivity')
+run('shell','am','force-stop','com.shubhamshakya.parcel')
+run('shell','am','start','-W','-n','com.shubhamshakya.parcel/com.shubhamshakya.parcel.android.MainActivity')
 accept=find('I understand · Explore Parcel')
 if accept is not None: tap(accept)
 from simulator_login import login_if_needed

@@ -45,7 +45,7 @@ Use `children` only for a confirmed child-directed audience; this configures chi
 Live mode updates UMP consent at launch, shows the required form, checks canRequestAds, and exposes Profile → Ad privacy choices when UMP requires it. Ads are removed while privacy choices are being changed. Consent failure without valid consent leaves ads disabled. Google's consent form is not replaced with Parcel's custom dialog.
 
 Required from the publisher:
-1. Android AdMob App ID for package `com.parcel.simulator`.
+1. Android AdMob App ID for package `com.shubhamshakya.parcel`.
 2. Two native ad unit IDs (Home and Category) and three **Banner** ad unit IDs (Wishlist, Cart, Purchased). Native IDs cannot be used for banner placements.
 3. Confirmed target age groups/countries; cute styling is not an audience declaration.
 4. Privacy-policy URL and configured AdMob Privacy & messaging forms.
@@ -67,3 +67,9 @@ Official references:
 - https://support.google.com/admob/answer/14538460
 
 Before live release, verify the native validator/Ad Inspector, consent required/not required/denied/error cases with your account, privacy reopening, offline/no-fill, light/dark, large fonts, rotation/backgrounding, and no extra requests on recomposition. Demo ads cannot prove live eligibility, fill or revenue.
+
+## Feature flag
+
+Ads are gated on `ParcelFeatures.GOOGLE_ADS_ENABLED` in `shared/domain`, currently `false`.
+Nothing in this guide takes effect until that constant is `true`; `liveAds` then controls
+whether test or release units are used.

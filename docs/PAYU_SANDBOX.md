@@ -165,3 +165,9 @@ References:
 - [Android callback URLs](https://docs.payu.in/docs/handling-redirect-urls-surlfurl-with-android-sdk)
 - [Current cards and UPI test guide](https://docs.payu.in/docs/test-cards-upi-id-and-wallets)
 - [Official UPI Intent Simulator](https://github.com/payu-india/PayU-UPI-Intent-Simulator-App)
+
+## Feature flag
+
+PayU is gated on `ParcelFeatures.PAYU_ENABLED` in `shared/domain`, currently `false`.
+While it is `false` the gateway reports itself unconfigured and the checkout option is
+hidden, whatever `payUSandboxUrl` is set to.
