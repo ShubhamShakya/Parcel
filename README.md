@@ -128,4 +128,4 @@ beside the local font files.
 
 ## Advertising
 
-Advertising is switched off at `ParcelFeatures.GOOGLE_ADS_ENABLED`, so no ad SDK work runs and no slots render. With the flag on, Android debug builds show Google native test ads on Home and category lists, plus inline adaptive banner test ads in Wishlist, Cart and Purchased; release ads additionally need `liveAds`. See [AdMob setup](docs/ADMOB.md) for IDs, consent, audience configuration and release requirements.
+Advertising is switched off at `ParcelFeatures.GOOGLE_ADS_ENABLED`, so no ad SDK work runs and no slots render. With the flag on, Android debug builds include Google native test ads on Home, category lists, Wishlist and Purchased; frequency-capped interstitials on Cart/Profile entry; and optional rewarded ads to unlock shelf spaces beyond the six free spaces. Release ads additionally need `liveAds`. See [AdMob setup](docs/ADMOB.md) for IDs, consent, audience configuration and release requirements.

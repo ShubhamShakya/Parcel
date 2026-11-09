@@ -23,7 +23,7 @@ import com.shubhamshakya.parcel.domain.ParcelFeatures
 import com.shubhamshakya.parcel.presentation.*
 
 /** Activity-scoped consent UI; ad views and SDK objects never enter shared state. */
-class AndroidParcelAds(private val activity: Activity) : ParcelAds {
+class AndroidParcelAds(private val activity: Activity, delivery: com.parcel.domain.DeliveryRepository) : ParcelAds {
     private companion object {
         var initializationStarted = false
         var sdkReady by mutableStateOf(false)
@@ -35,6 +35,10 @@ class AndroidParcelAds(private val activity: Activity) : ParcelAds {
     private var privacyError by mutableStateOf<String?>(null)
     private var disposed = false
     private val consent by lazy { UserMessagingPlatform.getConsentInformation(activity) }
+
+    private val fullScreen = FullScreenAds(activity, delivery) { ready && sdkReady && !disposed }
+    override fun enterTab(placement: InterstitialPlacement?, navigate: () -> Unit) = fullScreen.enter(placement, navigate)
+    override fun watchShelfReward(slot: Int, finished: (String?) -> Unit) = fullScreen.reward(slot, finished)
 
     fun start() {
         if (!enabled) return
@@ -49,6 +53,7 @@ class AndroidParcelAds(private val activity: Activity) : ParcelAds {
         if (disposed) return
         privacyRequired = consent.privacyOptionsRequirementStatus == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED
         ready = false
+        fullScreen.invalidate()
         if (consent.canRequestAds()) initialize()
     }
     @Suppress("DEPRECATION")
@@ -60,18 +65,20 @@ class AndroidParcelAds(private val activity: Activity) : ParcelAds {
                 RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE else RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_FALSE)
             .build())
         ready = true
+        if (sdkReady) fullScreen.preload()
         if (!initializationStarted) {
             initializationStarted = true
             MobileAds.initialize(activity.applicationContext) {
-                android.os.Handler(android.os.Looper.getMainLooper()).post { sdkReady = true }
+                android.os.Handler(android.os.Looper.getMainLooper()).post { sdkReady = true; if (!disposed) fullScreen.preload() }
             }
         }
     }
-    fun dispose() { disposed = true; ready = false }
+    fun dispose() { disposed = true; ready = false; fullScreen.dispose() }
 
     @Composable override fun PrivacyOptions() {
         if (privacyRequired) OutlinedButton(onClick = {
             ready = false
+            fullScreen.invalidate()
             UserMessagingPlatform.showPrivacyOptionsForm(activity) { error ->
                 if (!disposed) {
                     if (error != null) privacyError = "Privacy options could not be opened. Please try again."
@@ -85,21 +92,13 @@ class AndroidParcelAds(private val activity: Activity) : ParcelAds {
         }
     }
 
-    @Composable override fun Banner(placement: BannerPlacement) {
-        if (!ready || !sdkReady) return
-        val unitId = if (testMode) "ca-app-pub-3940256099942544/9214589741" else when (placement) {
-            BannerPlacement.Wishlist -> BuildConfig.WISHLIST_BANNER_AD_ID
-            BannerPlacement.Cart -> BuildConfig.CART_BANNER_AD_ID
-            BannerPlacement.Purchased -> BuildConfig.PURCHASED_BANNER_AD_ID
-        }
-        ParcelBannerAd(activity, placement, unitId)
-    }
-
     @Composable override fun NativeCard(placement: AdPlacement) {
         if (!ready || !sdkReady) return
         val unitId = if (testMode) "ca-app-pub-3940256099942544/2247696110" else when (placement) {
             AdPlacement.Home -> BuildConfig.HOME_NATIVE_AD_ID
             AdPlacement.Category -> BuildConfig.CATEGORY_NATIVE_AD_ID
+            AdPlacement.Wishlist -> BuildConfig.WISHLIST_NATIVE_AD_ID
+            AdPlacement.Purchased -> BuildConfig.PURCHASED_NATIVE_AD_ID
         }
         var ad by remember(unitId) { mutableStateOf<NativeAd?>(null) }
         DisposableEffect(unitId) {

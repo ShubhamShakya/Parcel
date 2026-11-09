@@ -10,13 +10,12 @@ val adsAudience = providers.gradleProperty("parcelAdsAudience").orElse("adults")
 val adsAppId = providers.gradleProperty("admobAppId").orElse("ca-app-pub-3940256099942544~3347511713").get()
 val homeAdId = providers.gradleProperty("admobHomeNativeId").orElse("").get()
 val categoryAdId = providers.gradleProperty("admobCategoryNativeId").orElse("").get()
-val bannerIds = listOf("Wishlist", "Cart", "Purchased").associateWith {
-    providers.gradleProperty("admob${it}BannerId").orElse("").get()
-}
+val extraAdIds = listOf("WishlistNative", "PurchasedNative", "CartInterstitial", "ProfileInterstitial", "ShelfRewarded")
+    .associateWith { providers.gradleProperty("admob${it}Id").orElse("").get() }
 if (liveAds) {
     require(adsAudience in listOf("adults", "children")) { "Confirm the intended audience before enabling live ads. Mixed audiences need an age-screen implementation first." }
     require(Regex("ca-app-pub-[0-9]{16}~[0-9]{10}").matches(adsAppId) && !adsAppId.contains("3940256099942544")) { "Set your real admobAppId before enabling live ads." }
-    (listOf(homeAdId, categoryAdId) + bannerIds.values).forEach { require(Regex("ca-app-pub-[0-9]{16}/[0-9]{10}").matches(it) && !it.contains("3940256099942544")) }
+    (listOf(homeAdId, categoryAdId) + extraAdIds.values).forEach { require(Regex("ca-app-pub-[0-9]{16}/[0-9]{10}").matches(it) && !it.contains("3940256099942544")) }
 }
 android {
     namespace = "com.shubhamshakya.parcel.android"; compileSdk = 36
@@ -29,8 +28,9 @@ android {
         buildConfigField("boolean", "CHILD_DIRECTED_ADS", (adsAudience == "children").toString())
         buildConfigField("String", "HOME_NATIVE_AD_ID", "\"${if (liveAds) homeAdId else ""}\"")
         buildConfigField("String", "CATEGORY_NATIVE_AD_ID", "\"${if (liveAds) categoryAdId else ""}\"")
-        bannerIds.forEach { (placement, id) ->
-            buildConfigField("String", "${placement.uppercase()}_BANNER_AD_ID", "\"${if (liveAds) id else ""}\"")
+        extraAdIds.forEach { (placement, id) ->
+            val field = placement.replace(Regex("([a-z])([A-Z])"), "$1_$2").uppercase() + "_AD_ID"
+            buildConfigField("String", field, "\"${if (liveAds) id else ""}\"")
         }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

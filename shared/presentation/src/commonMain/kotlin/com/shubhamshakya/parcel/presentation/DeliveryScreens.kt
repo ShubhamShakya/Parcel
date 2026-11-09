@@ -144,16 +144,38 @@ fun PurchasedScreen(receipts: List<Receipt>, products: List<Product>, state: Del
     val unboxed = state.snapshot.orders.filter { it.unboxedAt != null }.map { it.orderId }.toSet()
     val items = receipts.filter { it.checkout.id in unboxed }.flatMap(::purchasedItems)
     var selectedSlot by rememberSaveable { mutableStateOf<Int?>(null) }
+    var unlockSlot by remember { mutableStateOf<Int?>(null) }
+    var rewardLoading by remember { mutableStateOf(false) }
+    var rewardMessage by remember { mutableStateOf<String?>(null) }
+    var cancelReward by remember { mutableStateOf<(() -> Unit)?>(null) }
+    DisposableEffect(ads) { onDispose { cancelReward?.invoke() } }
+    unlockSlot?.let { slot ->
+        ParcelDialog(onDismissRequest = { cancelReward?.invoke(); rewardLoading = false; unlockSlot = null },
+            title = { Text("Unlock space ${slot + 1}?") },
+            text = { Text(if (rewardLoading) "Loading your ad…" else "Watch one ad to unlock this space permanently on this device. Your first six spaces are always free. Close early without earning the reward and this space stays locked.") },
+            confirmButton = { TextButton(enabled = !rewardLoading, modifier = Modifier.testTag("watch_shelf_ad"), onClick = {
+                rewardLoading = true
+                cancelReward = ads.watchShelfReward(slot) { error ->
+                    rewardLoading = false; unlockSlot = null
+                    rewardMessage = error ?: "Space ${slot + 1} is unlocked!"
+                }
+            }) { Text(if (rewardLoading) "Loading…" else "Watch ad · unlock 1 space") } },
+            dismissButton = { TextButton(onClick = { cancelReward?.invoke(); rewardLoading = false; unlockSlot = null }, modifier = Modifier.testTag("cancel_shelf_ad")) { Text("Not now") } })
+    }
+    rewardMessage?.let { message -> ParcelDialog(onDismissRequest = { rewardMessage = null },
+        title = { Text("Your shelf") }, text = { Text(message) },
+        confirmButton = { TextButton(onClick = { rewardMessage = null }) { Text("OK") } }) }
+
     LazyColumn(Modifier.fillMaxSize().testTag("purchased_list"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) { Text("My little shelf", style = MaterialTheme.typography.headlineMedium, color = Teal); Text("A home for every happy find.", color = Muted) }
                 ParcelFriend(Modifier.size(76.dp), greeting = true)
             }
-            Text("${items.size} unboxed · ${state.snapshot.shelf.size}/12 spaces filled", style = MaterialTheme.typography.bodySmall)
+            Text("${items.size} unboxed · ${state.snapshot.shelf.size}/${state.snapshot.unlockedSlots.size} unlocked spaces filled", style = MaterialTheme.typography.bodySmall)
             TextButton(onClick = orders, modifier = Modifier.testTag("purchased_orders")) { Text("My orders & deliveries") }
         }
-        item(key = "purchased_banner") { ads.Banner(BannerPlacement.Purchased) }
+        item(key = "purchased_native") { ads.NativeCard(AdPlacement.Purchased) }
         item {
             Surface(color = Peach, shape = RoundedCornerShape(26.dp), shadowElevation = 2.dp) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -163,9 +185,10 @@ fun PurchasedScreen(receipts: List<Receipt>, products: List<Product>, state: Del
                                 val slot = row*3+column
                                 val item = items.find { it.id == state.snapshot.shelf.find { p -> p.slot == slot }?.itemId }
                                 val product = products.find { it.id == item?.productId }
-                                Surface(onClick = { selectedSlot = slot }, enabled = !state.loading && !state.busy, color = ParcelSurface, shape = RoundedCornerShape(16.dp), modifier = Modifier.weight(1f).height(126.dp).testTag("shelf_slot_$slot")) {
+                                Surface(onClick = { if (slot in state.snapshot.unlockedSlots) selectedSlot = slot else unlockSlot = slot }, enabled = !state.loading && !state.busy && !rewardLoading, color = ParcelSurface, shape = RoundedCornerShape(16.dp), modifier = Modifier.weight(1f).height(126.dp).testTag("shelf_slot_$slot")) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.padding(6.dp)) {
-                                        if (item == null) { Text("+", style = MaterialTheme.typography.headlineMedium, color = Teal); Text("Space ${slot+1}", style = MaterialTheme.typography.labelSmall, color = Muted) }
+                                        if (slot !in state.snapshot.unlockedSlots) { Text("Locked", style = MaterialTheme.typography.titleSmall); Text("Watch ad to unlock", style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center) }
+                                        else if (item == null) { Text("+", style = MaterialTheme.typography.headlineMedium, color = Teal); Text("Space ${slot+1}", style = MaterialTheme.typography.labelSmall, color = Muted) }
                                         else {
                                             if (product != null) ProductImage(product, Modifier.size(68.dp).clip(RoundedCornerShape(12.dp))) else Symbol(Glyph.Bag, modifier = Modifier.size(48.dp))
                                             Text(item.title, maxLines = 2, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, modifier = Modifier.testTag("shelf_item_${item.id}"))
@@ -178,7 +201,7 @@ fun PurchasedScreen(receipts: List<Receipt>, products: List<Product>, state: Del
                 }
             }
         }
-        item { Text("Tap a space to choose an unboxed item. Tap an occupied space to swap, move or put it away.", color = Muted, style = MaterialTheme.typography.bodySmall) }
+        item { Text("Six spaces are free. Watch an optional ad to unlock each extra space. Tap an unlocked space to arrange your finds.", color = Muted, style = MaterialTheme.typography.bodySmall) }
         if (items.isNotEmpty()) {
             item { Text("Your unboxed finds", style = MaterialTheme.typography.titleLarge) }
             items(items.chunked(2)) { pair ->

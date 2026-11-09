@@ -1,72 +1,72 @@
-# Parcel AdMob integration
+# Parcel advertising
 
-## Placements and scope
+## Current placements
 
-- Home: one native card immediately after featured offers, before the main product grid.
-- Category/clothing lists: one full-width native card after eight products, when there are at least nine results and no search query.
-- Wishlist, Cart and Purchased: one inline adaptive banner below the screen heading, separated from item/shelf controls. The Cart banner scrolls with content, away from the fixed Checkout button.
-- Search results, checkout, authentication, tracking and unboxing remain ad-free. Optional product-detail, rewarded and interstitial formats were not part of the recommended initial rollout.
-- Each card labels external advertising, renders SDK assets inside NativeAdView and retains AdChoices. SDK handles impressions and clicks. No reward or real-shopping offer is implied.
-- Ad requests run when a placement enters composition, not on recomposition. SDK initialization is process-scoped. Leaving the placement disposes the ad; a late load callback destroys its result. No-fill/network failures hide the card and do not block browsing. There is no automatic refresh timer.
-- Shared presentation exposes ParcelAds via a composition local. Android owns SDK objects; unsupported platforms default to no ads. No ad SDK enters domain/data modules.
+- Native cards: Home after featured offers, category lists after eight products, Wishlist below its heading, and Purchased between its heading and shelf.
+- Interstitials: eligible transitions into Cart or Profile using their bottom tabs. Tapping the already-selected tab does not trigger an ad. No banners remain; the earlier Profile banner request was superseded by the interstitial/native layout.
+- Only a preloaded interstitial can show. No fill, offline, unavailable consent or SDK initialization causes navigation to proceed immediately; a later load never interrupts the new page.
+- Interstitials require at least two tab transitions, a 60-second initial grace period and a 120-second cooldown shared by Cart/Profile. An earned/rewarded ad also resets the cooldown. No ads on launch, exit, checkout/payment forms or tracking/unboxing.
+- Google controls ad content, impressions and clicks. Native cards label external advertising and preserve AdChoices. Do not click live ads during testing.
 
-Banners use content width with a maximum requested height of 100dp. They pause/resume with the activity and are destroyed on leaving their placement. Load failures hide them; any SDK refresh follows AdMob settings. Native Home/category placements are unchanged.
+## Shelf rewards
 
-## Test ads
+- Six free spaces (1–6), twelve total. Spaces 7–12 can each be unlocked permanently on this device by earning one optional rewarded ad.
+- Tapping a locked space shows a custom disclosure with the exact reward and “Not now”. Only “Watch ad · unlock 1 space” requests an ad. Cancelling a pending load prevents it from appearing later.
+- A space unlocks only from Google's earned-reward callback, never from loading, showing or dismissal. Skipping/closing without earning or an ad failure leaves it locked. Duplicate callbacks for the same space do not grant another space.
+- Unlocks use existing Room preference rows, persist across restarts and remain device-wide like the shelf. Existing occupied slots beyond six are retained on upgrade. No database schema change is required.
+- Rewards save in a process scope independent of Activity destruction. This is a local simulator entitlement, not a server-verified or cross-device purchase. Clearing app data removes it. Google rewarded inventory may include interactive creatives as well as video.
 
-Normal debug builds always use Google's native test unit `ca-app-pub-3940256099942544/2247696110` and sample application ID `ca-app-pub-3940256099942544~3347511713` (unless an explicit live configuration supplies the manifest app ID; the debug ad unit still remains the Google test unit).
+## Debug/testing
 
-The three banners use Google’s demo unit `ca-app-pub-3940256099942544/9214589741` in debug builds.
+No account or keys are needed for Google demo ads. Debug builds always use demo unit IDs:
 
-No account, API key, payment details or backend is needed to test Google creatives. A connected emulator/device with internet access is needed. Debug mode bypasses UMP and applies G-rated/child-directed test requests. A test creative should visibly identify itself as a test ad.
+- Native: `ca-app-pub-3940256099942544/2247696110`
+- Interstitial: `ca-app-pub-3940256099942544/1033173712`
+- Rewarded: `ca-app-pub-3940256099942544/5224354917`
+- Sample app ID: `ca-app-pub-3940256099942544~3347511713`
 
-Testing real consent messages requires your own AdMob App ID, a published Privacy & messaging configuration, and a separately configured UMP test device/geography. The demo configuration does not verify the publisher's consent flow. Do not use production creatives for development or click your live ads.
+Debug requests use G-rated/child-directed treatment and bypass UMP; the confirmed product audience is **adults only**. Live release configuration uses the audience setting and UMP. Testing actual publisher consent messages requires your own App ID, published Privacy & messaging configuration and a configured UMP test device/geography. Demo ads cannot establish live eligibility or revenue.
 
 ## Live configuration
 
-The owner confirmed **adults only** on 25 October 2026; this is the configured default audience.
-
-Release builds are ad-free by default. Enable explicitly only after audience and publisher setup are complete:
+Release builds have ads disabled by default. Supply an Android App ID for package `com.shubhamshakya.parcel`, four native unit IDs, two interstitial IDs and one rewarded ID. IDs must match their formats; former banner IDs cannot be reused as native/interstitial IDs.
 
 ```
 ./gradlew :androidApp:assembleRelease \
-  -PparcelLiveAds=true \
-  -PparcelAdsAudience=adults \
+  -PparcelLiveAds=true -PparcelAdsAudience=adults \
   -PadmobAppId=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX \
   -PadmobHomeNativeId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
   -PadmobCategoryNativeId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
-  -PadmobWishlistBannerId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
-  -PadmobCartBannerId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
-  -PadmobPurchasedBannerId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+  -PadmobWishlistNativeId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
+  -PadmobPurchasedNativeId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
+  -PadmobCartInterstitialId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
+  -PadmobProfileInterstitialId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX \
+  -PadmobShelfRewardedId=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
 ```
 
-Use `children` only for a confirmed child-directed audience; this configures child-directed requests and under-age consent treatment. An app serving both adults and children requires a neutral age screen and per-user treatment before enabling live ads; `mixed`/unknown audiences are deliberately rejected. All requests currently have maximum content rating G.
+Configure your privacy-policy URL, AdMob Privacy & messaging forms, developer website with app-ads.txt, store listing, app verification/readiness review and Play ads/Data safety declarations before enabling live ads. Do not send passwords or payment credentials.
 
-Live mode updates UMP consent at launch, shows the required form, checks canRequestAds, and exposes Profile → Ad privacy choices when UMP requires it. Ads are removed while privacy choices are being changed. Consent failure without valid consent leaves ads disabled. Google's consent form is not replaced with Parcel's custom dialog.
+UMP updates at launch, shows required consent forms, gates requests through canRequestAds, and offers Profile → Ad privacy choices when required. Changing privacy invalidates preloaded interstitials. Mixed-age audiences require a neutral age screen and per-user treatment before enabling live ads; currently rejected by configuration.
 
 Required from the publisher:
 1. Android AdMob App ID for package `com.shubhamshakya.parcel`.
-2. Two native ad unit IDs (Home and Category) and three **Banner** ad unit IDs (Wishlist, Cart, Purchased). Native IDs cannot be used for banner placements.
+2. Four native ad unit IDs (Home, Category, Wishlist, Purchased), two interstitial IDs (Cart, Profile) and one rewarded ID (shelf). Former banner IDs cannot be reused.
 3. Confirmed target age groups/countries; cute styling is not an audience declaration.
 4. Privacy-policy URL and configured AdMob Privacy & messaging forms.
 5. Developer website hosting `/app-ads.txt`, linked from the Play listing; complete AdMob app verification/readiness review.
 6. Updated Play Console ads/Data safety/target audience declarations and release signing setup.
 
-IDs are configuration, not secrets. Never send Google passwords, service-account keys or payment credentials.
+SDK: Google Mobile Ads 25.4.0 retains Android API 23 support; UMP 4.0.0. No mediation adapters. Android owns SDK objects; shared code owns shelf rules and persistence. Other targets default to no ads.
 
-## SDK and checks
+## References
 
-Uses Google Mobile Ads 25.4.0 to retain existing Android API 23 support; 25.5 raises the minimum to 24. UMP is 4.0.0. No mediation adapters are configured. Recheck supported SDK versions and policies before store release.
-
-Official references:
-- https://developers.google.com/admob/android/quick-start
 - https://developers.google.com/admob/android/native/advanced
-- https://developers.google.com/admob/android/test-ads
+- https://developers.google.com/admob/android/interstitial
+- https://developers.google.com/admob/android/rewarded
 - https://developers.google.com/admob/android/privacy
-- https://support.google.com/admob/answer/6223431
-- https://support.google.com/admob/answer/14538460
+- https://support.google.com/admob/answer/6201362
 
-Before live release, verify the native validator/Ad Inspector, consent required/not required/denied/error cases with your account, privacy reopening, offline/no-fill, light/dark, large fonts, rotation/backgrounding, and no extra requests on recomposition. Demo ads cannot prove live eligibility, fill or revenue.
+Before live release verify consent scenarios with your account, offline/no-fill, callback errors, background/rotation, reward delivery and ad layout using Ad Inspector. Reward persistence/UI tests with controlled callbacks do not replace a real SDK rewarded-ad test.
 
 ## Feature flag
 

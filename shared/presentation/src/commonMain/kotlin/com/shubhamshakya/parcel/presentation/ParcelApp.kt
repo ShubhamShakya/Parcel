@@ -119,6 +119,7 @@ private fun ShopNavigation(state: CatalogState, vm: CatalogViewModel, commerce: 
     val companionRepository = koinInject<CompanionRepository>()
     val companionVm = viewModel { CompanionViewModel(companionRepository) }
     val companion by companionVm.state.collectAsStateWithLifecycle()
+    val ads = LocalParcelAds.current
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route ?: "home"
@@ -134,7 +135,11 @@ private fun ShopNavigation(state: CatalogState, vm: CatalogViewModel, commerce: 
         if (route in listOf("home", "wishlist", "cart", "purchased", "about")) NavigationBar(containerColor = ParcelSurface, tonalElevation = 0.dp, windowInsets = WindowInsets(0)) {
             tabs.forEach { (path, label, icon) ->
                 NavigationBarItem(selected = route == path, onClick = {
-                    nav.navigate(path) { popUpTo("home"); launchSingleTop = true }
+                    if (route != path) ads.enterTab(when (path) {
+                        "cart" -> InterstitialPlacement.Cart
+                        "about" -> InterstitialPlacement.Profile
+                        else -> null
+                    }) { nav.navigate(path) { popUpTo("home"); launchSingleTop = true } }
                 }, icon = { Symbol(icon) }, label = { Text(label) }, modifier = Modifier.testTag("tab_$path"))
             }
         }
@@ -339,7 +344,7 @@ private fun WishlistScreen(state: CatalogState, vm: CatalogViewModel, open: (Str
                 Text("A place for all your someday favourites.", color = Muted)
             }
         }
-        item(key = "wishlist_banner", span = { GridItemSpan(maxLineSpan) }) { ads.Banner(BannerPlacement.Wishlist) }
+        item(key = "wishlist_native", span = { GridItemSpan(maxLineSpan) }) { ads.NativeCard(AdPlacement.Wishlist) }
         if (state.savedProducts.isEmpty()) item(span = { GridItemSpan(maxLineSpan) }) {
             Column(Modifier.fillMaxWidth().padding(vertical = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Symbol(Glyph.Heart, modifier = Modifier.size(48.dp), color = Teal)
