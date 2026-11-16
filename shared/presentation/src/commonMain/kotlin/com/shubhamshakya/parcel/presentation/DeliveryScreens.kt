@@ -206,7 +206,9 @@ fun PurchasedScreen(receipts: List<Receipt>, products: List<Product>, state: Del
                 }
             }
         }
-        item { Text("Six spaces are free. Watch an optional ad to unlock each extra space. Tap an unlocked space to arrange your finds.", color = Muted, style = MaterialTheme.typography.bodySmall) }
+        item { Text(if (ParcelFeatures.GOOGLE_ADS_ENABLED)
+            "Six spaces are free. Watch an optional ad to unlock each extra space. Tap an unlocked space to arrange your finds."
+            else "Tap a space to arrange your finds.", color = Muted, style = MaterialTheme.typography.bodySmall) }
         if (items.isNotEmpty()) {
             item { Text("Your unboxed finds", style = MaterialTheme.typography.titleLarge) }
             items(items.chunked(2)) { pair ->

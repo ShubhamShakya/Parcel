@@ -11,18 +11,28 @@ python3 tools/generate_play_store_art.py
 
 Pillow is the only dependency, and it is needed only to regenerate.
 
-## Why these do not show the app
+## Screenshots show the real app
 
-The images are illustrative brand art — the parcel friend, product illustrations and brand
-shapes. **No application UI is depicted**, so a change to a screen's layout, copy or spacing
-does not invalidate them. They need regenerating only when the brand palette, the mascot or
-the launcher mark changes.
+Google Play rejected an earlier version of this listing with:
 
-The trade-off is deliberate and worth restating before you upload: Google Play's metadata
-policy expects screenshots to represent the actual in-app experience, and listings whose
-screenshots show no app UI can be rejected or asked to change. If a review flags this, the
-fix is to add real captures — `tools/capture_*.py` already drive an emulator — or to switch
-the panels to device-framed mockups rather than to redraw anything by hand.
+> The screenshots consist of marketing illustrations or graphics instead of the
+> in-app experience.
+
+The screenshots are therefore captured from a running device and composited under a
+caption band — real UI, not drawn artwork:
+
+```sh
+ANDROID_SERIAL=emulator-5554 python3 tools/capture_play_screenshots.py
+```
+
+The script walks the app (disclosure, home, clothing, wishlist, shelf, cart, profile),
+seeds a wishlist item and a cart so no screen is captured in its empty state, and
+writes both the finished panels and the untouched device captures, the latter in
+`raw-captures/` so a caption can be reworded without driving the device again.
+
+Re-run it after a UI change that alters one of those screens. The icon and feature
+graphic are not screenshots, so they remain illustrative brand art from
+`tools/generate_play_store_art.py`; that script no longer emits screenshots.
 
 ## Files
 
@@ -31,9 +41,9 @@ the panels to device-framed mockups rather than to redraw anything by hand.
 | `icon-512-teal.png` | 512×512 | App icon — matches the current launcher background |
 | `icon-512-navy.png` | 512×512 | App icon — matches the in-app dark theme |
 | `feature-graphic.png` | 1024×500 | Feature graphic |
-| `phone-01-hero.png` … `phone-08-simulated.png` | 1080×1920 | Phone screenshots (8; Play allows 2–8) |
+| `phone-01-hero.png` … `phone-08-simulated.png` | 1080×1920 | Phone screenshots (7; Play allows 2–8) |
 
-All files are 32-bit PNG and well under Play's limits (largest is 170 KB against a 15 MB cap).
+All files are 32-bit PNG and well under Play's limits (largest is 262 KB against a 15 MB cap).
 
 ### Two icons, one decision
 

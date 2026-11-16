@@ -3,7 +3,8 @@
 Paste these into Play Console → Main store listing. Character counts are given because
 Console rejects anything over the limit; counts below are for the text as written here.
 
-Every factual claim is checked against the code: 110 products (104 clothing + 6 others)
+Screenshots are real device captures (see README.md); Play rejected the earlier
+illustrated ones. Every factual claim is checked against the code: 110 products (104 clothing + 6 others)
 across five categories, five delivery stages, a collector's shelf, and
 `ParcelFeatures.GOOGLE_ADS_ENABLED = false`. **If you enable advertising, change the
 "no advertising and no analytics" line in the full description** — it is scoped to "this

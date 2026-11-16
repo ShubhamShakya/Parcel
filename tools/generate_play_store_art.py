@@ -1,10 +1,14 @@
-"""Original Play Store listing artwork. Development dependency: Pillow.
+"""Play Store icon and feature graphic. Development dependency: Pillow.
 
-Illustrative brand art only: the parcel friend, bundled product illustrations and
-brand shapes. No application UI is depicted, so the images stay valid when screens
-change. Regenerate after a brand or palette change with:
+Illustrative brand art: the parcel friend, the launcher mark and brand shapes.
+Regenerate after a brand or palette change with:
 
     python3 tools/generate_play_store_art.py
+
+This script does NOT produce the store screenshots. Google Play requires those to
+show the actual in-app experience, and a listing whose screenshots were drawn
+artwork was rejected for exactly that. They are captured from a running device by
+tools/capture_play_screenshots.py instead.
 """
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -127,87 +131,6 @@ def product_card(im, key, x, y, w, h, radius=38):
     im.paste(art, (x * SS, y * SS), mask)
 
 # --- Store graphics ---------------------------------------------------------
-PANELS = [
-    dict(key='01-hero', cy=1080, head='All the joy.\nNone of the spending.', sub='A shopping simulator for Android',
-         tint=PEACH, art='friend'),
-    dict(key='02-browse', cy=1070, head='Browse\nhandpicked finds', sub='Electronics, home and over 100 clothing pieces',
-         tint=LAVENDER, art='trio'),
-    dict(key='03-wishlist', cy=1120, head='Save every\nfavourite', sub='A wishlist that waits for you, offline',
-         tint=PINK, art='heart'),
-    dict(key='04-offers', cy=980, head='Offers that\nactually apply', sub='Coupons, taxes and totals, all simulated',
-         tint=PEACH, art='tag'),
-    dict(key='05-delivery', cy=1165, head='Follow every\ndelivery', sub='Five stages in four hours, or arrive instantly',
-         tint=MINT, art='route'),
-    dict(key='06-unbox', cy=1080, head='Open your\nparcel', sub='Lids lift. Confetti flies.',
-         tint=PEACH, art='unbox'),
-    dict(key='07-shelf', cy=1245, head='A shelf for\nyour finds', sub='Twelve spaces. Collect every one.',
-         tint=LAVENDER, art='shelf'),
-    dict(key='08-simulated', cy=915, head='No real money.\nEver.', sub='Products, prices and orders are simulated',
-         tint=MINT, art='badge'),
-]
-
-def draw_art(im, kind, cy):
-    d = ImageDraw.Draw(im)
-    if kind == 'friend':
-        parcel_friend(im, 540, cy, 780)
-    elif kind == 'trio':
-        product_card(im, 'headphones', 80, cy - 400, 460, 368)
-        product_card(im, 'backpack', 540, cy - 230, 460, 368)
-        product_card(im, 'lamp', 310, cy + 30, 460, 368)
-    elif kind == 'heart':
-        parcel_friend(im, 540, cy + 60, 560)
-        heart = Image.new('RGBA', im.size, (0, 0, 0, 0))
-        hd = ImageDraw.Draw(heart)
-        cx, hy, r = 540 * SS, (cy - 300) * SS, 78 * SS
-        hd.ellipse((cx - r * 1.05, hy - r * .7, cx + r * .05, hy + r * .45), fill='#EE91AA')
-        hd.ellipse((cx - r * .05, hy - r * .7, cx + r * 1.05, hy + r * .45), fill='#EE91AA')
-        hd.polygon([(cx - r, hy + r * .05), (cx + r, hy + r * .05), (cx, hy + r * 1.25)], fill='#EE91AA')
-        im.paste(Image.alpha_composite(im.convert('RGBA'), heart).convert('RGB'), (0, 0))
-    elif kind == 'tag':
-        d.rounded_rectangle((250 * SS, (cy - 200) * SS, 830 * SS, (cy + 130) * SS), radius=46 * SS, fill=ORANGE)
-        centred(d, '15%', font(700, 132), NAVY, 540, cy - 160)
-        centred(d, 'OFF', font(700, 54), NAVY, 540, cy + 10)
-        parcel_friend(im, 540, cy + 330, 400)
-    elif kind == 'route':
-        stops = [(140, cy + 210), (330, cy + 70), (540, cy + 150), (730, cy + 10), (900, cy - 120)]
-        for i in range(len(stops) - 1):
-            d.line((stops[i][0] * SS, stops[i][1] * SS, stops[i + 1][0] * SS, stops[i + 1][1] * SS),
-                   fill='#2E3A57', width=14 * SS)
-        for i, (sx, sy) in enumerate(stops):
-            done = i < len(stops) - 1
-            d.ellipse(((sx - 26) * SS, (sy - 26) * SS, (sx + 26) * SS, (sy + 26) * SS),
-                      fill=ORANGE if done else NAVY, outline=ORANGE, width=6 * SS)
-        parcel_friend(im, 880, cy - 330, 380)
-    elif kind == 'unbox':
-        parcel_friend(im, 540, cy + 20, 760, opening=1.0, confetti=True)
-    elif kind == 'shelf':
-        keys = ['headphones', 'backpack', 'lamp', 'mug', 'tote', 'women-dresses']
-        for row in range(2):
-            d.rounded_rectangle((110 * SS, (cy - 200 + row * 260) * SS, 970 * SS, (cy - 190 + row * 260) * SS),
-                                radius=6 * SS, fill='#49371F')
-            for col in range(3):
-                key = keys[row * 3 + col]
-                if (PRODUCTS / f'{key}.png').exists():
-                    product_card(im, key, 130 + col * 290, cy - 390 + row * 260, 250, 190, radius=26)
-    elif kind == 'badge':
-        d.ellipse((330 * SS, (cy - 210) * SS, 750 * SS, (cy + 210) * SS), outline=ORANGE, width=10 * SS)
-        centred(d, '₹0', font(700, 150), ORANGE, 540, cy - 120)
-        centred(d, 'spent', font(500, 46), IVORY, 540, cy + 60)
-        parcel_friend(im, 540, cy + 370, 400)
-
-def screenshot(panel, w=1080, h=1920):
-    im = canvas(w, h)
-    glow(im, 180, 300, 300, panel['tint'], 90)
-    glow(im, 940, 1500, 340, panel['tint'], 70)
-    d = ImageDraw.Draw(im)
-    y = centred(d, panel['head'], font(700, 78), IVORY, 540, 150)
-    centred(d, panel['sub'], font(400, 38), MUTED, 540, y + 20)
-    draw_art(im, panel['art'], panel['cy'])
-    d.rounded_rectangle((360 * SS, 1740 * SS, 720 * SS, 1830 * SS), radius=45 * SS, fill=SURFACE)
-    parcel_mark(im, 420, 1785, 70)
-    centred(d, 'Parcel', font(600, 38), IVORY, 565, 1762)
-    save(im, f'phone-{panel["key"]}.png', (w, h))
-
 def feature_graphic():
     im = canvas(1024, 500)
     glow(im, 120, 420, 220, PEACH, 110)
@@ -229,6 +152,4 @@ if __name__ == '__main__':
     icon('icon-512-teal.png', TEAL)
     icon('icon-512-navy.png', NAVY)
     feature_graphic()
-    for panel in PANELS:
-        screenshot(panel)
-    print(f'Done: {len(list(OUT.glob("*.png")))} files.')
+    print('Done. Screenshots come from tools/capture_play_screenshots.py.')
