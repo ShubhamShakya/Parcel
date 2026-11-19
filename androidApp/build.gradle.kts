@@ -20,8 +20,8 @@ if (liveAds) {
 android {
     namespace = "com.shubhamshakya.parcel.android"; compileSdk = 36
     defaultConfig {
-        applicationId = "com.shubhamshakya.parcel"; minSdk = 23; targetSdk = 36
-        versionCode = 7; versionName = "0.6.0"
+        applicationId = "com.shubhamshakya.parcel"; minSdk = 24; targetSdk = 36
+        versionCode = 1; versionName = "1.0.0"
         buildConfigField("String", "PAYU_SANDBOX_BASE_URL", "\"${payUSandboxUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         manifestPlaceholders["admobAppId"] = if (liveAds) adsAppId else "ca-app-pub-3940256099942544~3347511713"
         buildConfigField("boolean", "LIVE_ADS", liveAds.toString())
